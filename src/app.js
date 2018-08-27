@@ -19,6 +19,11 @@ app.start = (port) =>{
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 app.post('/500', (req, res) => {
   throw new Error('Test Error');
 });
@@ -31,7 +36,7 @@ app.get('/cowsay', (req, res) =>{
   html(res, `<!DOCTYPE html><html><head><title> cowsay </title>  </head><body><h1> cowsay </h1><pre>${cowSays}</pre></body></html>`);
 });
 app.get('/api/cowsay', (req, res) =>{
-  json(res, {
+  res.json({
     content: cowsay.say(req.query),
   });
 });
@@ -39,19 +44,38 @@ app.get('/api/v1/notes', (req,res) =>{
   requestMessage(res, req.query.id);
 });
 app.post('/api/cowsay', (req, res) => {
-  json(res, {
+  res.json({
     message: `Hello, ${req.body.name}!`,
   });
 });
 app.post('/api/v1/notes', (req, res) =>{
-  json(res, req.body);
+  res.json(req.body);
 });
 app.put('/api/v1/notes', (req,res)=>{
-  json(res, req.query);
+  res.json(req.params);
 });
 app.delete('/api/v1/notes', (req,res)=>{
-  deleteMessage(res, req.query.id);
+  deleteMessage(res, req.params.id);
 });
+
+app.get('/person', (req, res) => {
+  html(res, `<!DOCTYPE html><html><head><title> person </title></head><body><h1> Person </h1><p> Hello. I am a normal person </p></body></html>`);
+});
+
+app.get('/api/v1/person', (req,res) =>{
+  requestMessage(res, req.params.id);
+});
+
+app.post('/api/v1/person', (req, res) => {
+  res.json(req.body);
+});
+
+app.put('/api/v1/person', (req, res) => {
+  res.json(req.params);
+});
+app.delete('/api/v1/person', (req, res) => {
+  deleteMessage(res, req.params.id);
+})
 
 import router from './routes/api';
 app.use(router);

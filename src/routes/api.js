@@ -3,7 +3,7 @@
 import express from 'express';
 const router = express.Router();
 export default router;
-import Note from '../models/note';
+import Note from '../models/notes';
 
 router.get('/api/notes', (req, res) => {
   if (req.query.id) {
@@ -42,5 +42,31 @@ router.get('/api/notes/:id', (req, res) => {
 router.delete('/api/notes/:id', (req, res) => {
   res.json({
   message: `ID ${req.params.id} was deleted`,
+  });
+});
+
+router.get('/api/person', (req, res) => {
+  if (req.query.id) {
+    return Note.findById(req.query.id)
+      .then(note => {
+        res.json(notes);
+      });
+  }
+  Note.fetchAll()
+    .then(notes => {
+      res.json(person);
+    });
+});
+
+router.get('/api/person/:id', (req, res) => {
+  return Note.findById(req.params.id)
+  .then(note => {
+    res.json(person);
+  });
+});
+
+router.delete('/api/person/:id', (req, res) => {
+  res.json({
+    message: `Person ${req.params.id} was deleted. Sorry about the inconvenience`,
   });
 });
