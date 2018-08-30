@@ -1,11 +1,9 @@
 'use strict';
 
-const http = require('http');
+import express from 'express';
+const app = express();
 
-const router = require('./lib/router');
-
-const app = http.createServer(requestHandler);
-module.exports = app;
+export default app;
 
 app.start = (port) => 
   new Promise((resolveCallback, rejectCallback) => {
@@ -19,74 +17,38 @@ app.start = (port) =>
     });
   });
 
-function requestHandler(req,res) {
+app.use(express.json());
+
+app.use((req,res,next) => {
   console.log(`${req.method} ${req.url}`);
+  next();
+});
 
-  router.route(req,res)
-    .catch(err => {
-      if(err === 404){
-        notFound(res);
-        return;
-      }
-      console.log(err);
-      html(res,err.message, 500, 'Internal Server Error');
-    });
-}
-
-router.post('/500', (req,res) => {
+app.post('/500', (req,res) => {
   throw new Error('Test Error');
 });
 
-router.get('/', (req,res) => {
-  html(res, '<!DOCTYPE html><html><head><title> cowsay </title>  </head><body><header><nav><ul><li><a href="/cowsay">cowsay</a></li></ul></nav><header><main><!-- project description --></main></body></html>');
+app.get('/', (req,res) => {
+  html(res, '<html><body><h1>HOME</h1></body></html>');
 });
 
-router.get('/cowsay', (req,res) => {
-  let message = req.query.text?cowsay.say({text: req.query.text}):cowsay.say({text: 'I need something good to say!'});
-  html(res, `<!DOCTYPE html><html><head><title> cowsay </title></head><body><h1> cowsay </h1><pre>${message}</pre></html>`);
-});
-  
-router.get('/api/cowsay', (req,res) => {
-  json(res,{
-    text: req.query.text,
-  });
-});
-
-router.post('/api/test', (req, res) => {
-  json(res, {
+app.post('/api/test', (req, res) => {
+  res.json({
     message: req.body.text,
   });
 });
 
-require('./routes/api');
+import router from './routes/api';
+app.use(router);
+app.use((err,req,res,next) => {
+  console.error(err);
+  next(err);
+});
 
 function html(res,content, statusCode =200, statusMessage = 'OK') {
   res.statusCode = statusCode;
   res.statusMessage = statusMessage;
   res.setHeader('Content-Type', 'text/html');
   res.write(content);
-  res.end();
-}
-
-function json(res, object){
-  if(object!=={}){
-    res.statusCode = 200;
-    res.statusMessage = 'OK';
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify(object));
-    res.end();
-  } else{
-    res.statusCode = 400;
-    res.statusMessage = 'Invalid Request';
-    res.write('{"error": "invalid request: text query required"}');
-    res.end();
-  }
-}
-
-function notFound(res){
-  res.statusCode = 404;
-  res.statusMessage = 'NotFound';
-  res.setHeader('Content-Type', 'text/html');
-  res.write('Resource Not Found');
   res.end();
 }
