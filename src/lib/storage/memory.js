@@ -1,8 +1,8 @@
 'use strict';
 
-const uuid = require('uuid/v4');
+import uuid from 'uuid/v4';
 
-class MemoryStorage {
+export default class MemoryStorage {
   constructor(schema){
     this.schema = schema;
     this.data = {};
@@ -40,5 +40,3 @@ class MemoryStorage {
     );
   }
 }
-
-module.exports = MemoryStorage;

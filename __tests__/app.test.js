@@ -3,7 +3,7 @@
 const request = require('supertest');
 
 const app = require('../src/app');
-const Note = require('../src/models/note');
+import Note from'../src/models/notes';
 
 describe('app', () => {
   it('responds with 404 for unknown path', () => {
@@ -27,7 +27,7 @@ describe('app', () => {
   it('responds with message for POST', () => {
     return request(app)
       .post('/api/test')
-      .send({ test: 'Hello world'})
+      .send({ text: 'Hello, world!' })
       .expect(200)
       .expect('Content-Type', 'application/json')
       .expect(res => {
@@ -96,6 +96,6 @@ describe('api routes', () => {
       .delete('/api/notes?id=deleteme')
       .expect(200)
       .expect('Content-Type', 'application/json')
-      .expect({ message: `ID deleteme was delted`});
+      .expect({ message: `ID deleteme was deleted`});
   });
 });

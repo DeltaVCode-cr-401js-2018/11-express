@@ -52,6 +52,12 @@ router.get('/api/cowsay', (req,res) => {
   });
 });
 
+router.post('/api/test', (req, res) => {
+  json(res, {
+    message: req.body.text,
+  });
+});
+
 require('./routes/api');
 
 function html(res,content, statusCode =200, statusMessage = 'OK') {
