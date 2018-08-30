@@ -1,40 +1,41 @@
 'use strict';
 
-const router = require('../lib/router');
+import express from 'express';
+const router = express.Router();
+
+export default router;
+
 import Note from '../models/notes';
 
 router.get('/api/notes',(req,res) => {
-  if(req.query.id) {
-    return Note.findByID(req.query.id)
-      .then(note => {
-        json(res,note);
-      });
-  }
-  
   Note.fetchAll()
     .then(notes => {
-      json(res, notes);
+      res.json(notes);
     });
 });
 
 router.post('/api/notes', (req,res) => {
+  if(!req.body || !req.body.title) {
+    res.send(400);
+    res.end();
+    return;
+  }
   var newNote = new Note(req.body);
   newNote.save()
     .then(saved => {
-      json(res,saved);
+      res.json(saved);
     });
 });
 
-router.delete('/api/notes', (req,res) => {
-  json(res, {
-    message: `ID ${req.query.id} was deleted`,
-  });
+router.get('/api/notes/:id', (req,res) => {
+  return Note.findById(req.params.id)
+    .then(note => {
+      res.json(note);
+    });
 });
 
-function json(res, object){
-  res.statusCode = 200;
-  res.statusMessage = 'OK';
-  res.setHeader('Content-Type', 'application/json');
-  res.write(JSON.stringify(object));
-  res.end();
-}
+router.delete('/api/notes/:id', (req,res) => {
+  res.json({
+    message: `ID ${req.params.id} was deleted`,
+  });
+});

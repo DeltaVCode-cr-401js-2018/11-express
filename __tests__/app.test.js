@@ -2,7 +2,7 @@
 
 const request = require('supertest');
 
-const app = require('../src/app');
+import app from '../src/app';
 import Note from'../src/models/notes';
 
 describe('app', () => {
@@ -10,8 +10,7 @@ describe('app', () => {
     return request(app)
       .get('/404')
       .expect(404)
-      .expect('Content-Type', 'text/html')
-      .expect('Resource Not Found');
+      .expect('Content-Type', 'text/html; charset=utf-8');
   });
 
   it('responds with html for /', () => {
@@ -29,7 +28,7 @@ describe('app', () => {
       .post('/api/test')
       .send({ text: 'Hello, world!' })
       .expect(200)
-      .expect('Content-Type', 'application/json')
+      .expect('Content-Type', 'application/json; charset=utf-8')
       .expect(res => {
         expect(res.body).toBeDefined();
         expect(res.body.message).toBe('Hello, world!');
@@ -40,8 +39,7 @@ describe('app', () => {
     return request(app)
       .post('/500')
       .expect(500)
-      .expect('Content-Type', 'text/html')
-      .expect('Test Error');
+      .expect('Content-Type', 'text/html; charset=utf-8');
   });
 });
 
@@ -59,22 +57,36 @@ describe('api routes', () => {
       return request(app)
         .get('/api/notes')
         .expect(200)
-        .expect('Content-Type', 'application/json')
+        .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(savedNotes);
     });
   });
 
-  it('can get /api/notes?id=...', () => {
+  it('can get /api/notes:id', () => {
     var note = new Note({ title: 'save', content: 'this'});
 
     return note.save()
       .then(saved => {
         return request(app)
-          .get(`/api/notes?id=${saved.id}`)
+          .get(`/api/notes/${saved.id}`)
           .expect(200)
-          .expect('Content-Type', 'application/json')
+          .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(saved);
       });
+  });
+
+  it('returns 400 for POST /api/notes without body', () => {
+    return request(app)
+      .post('/api/notes')
+      .set('Content-Type', 'application/json; charset=utf-8')
+      .send('this is not json')
+      .expect(400);
+  });
+  it('returns 400 for POST /api/notes with empty body', () => {
+    return request(app)
+      .post('/api/notes')
+      .send({})
+      .expect(400);
   });
 
   it('can POST /api/notes to create note', () => {
@@ -82,7 +94,7 @@ describe('api routes', () => {
       .post('/api/notes')
       .send({ title: 'test', content: 'Working'})
       .expect(200)
-      .expect('Content-Type', 'application/json')
+      .expect('Content-Type', 'application/json; charset=utf-8')
       .expect(res => {
         expect(res.body).toBeDefined();
         expect(res.body.id).toBeDefined();
@@ -91,11 +103,11 @@ describe('api routes', () => {
       });
   });
 
-  it('can delete /api/notes?id=deleteme', () => {
+  it('can delete /api/notes/deleteme', () => {
     return request(app)
-      .delete('/api/notes?id=deleteme')
+      .delete('/api/notes/deleteme')
       .expect(200)
-      .expect('Content-Type', 'application/json')
+      .expect('Content-Type', 'application/json; charset=utf-8')
       .expect({ message: `ID deleteme was deleted`});
   });
 });
